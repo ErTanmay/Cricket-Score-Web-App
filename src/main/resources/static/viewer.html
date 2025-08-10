@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cricket Score - Live Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+</head>
+<body>
+    <h1>Live Cricket Score</h1>
+    <div id="scoreBoard" style="font-size: 24px; font-weight: bold; margin-top: 20px;">
+        Waiting for score updates...
+    </div>
+
+    <script>
+        let stompClient = null;
+
+        function connect() {
+            const socket = new SockJS('http://localhost:8081/ws');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/score', function (message) {
+                    showScore(message.body);
+                });
+            }, function (error) {
+                console.error('WebSocket connection error: ' + error);
+            });
+        }
+
+        function showScore(score) {
+            document.getElementById('scoreBoard').textContent = score;
+        }
+
+        connect();
+    </script>
+</body>
+</html>

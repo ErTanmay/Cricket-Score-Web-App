@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cricket Score - Admin Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+</head>
+<body>
+    <h1>Cricket Score - Admin Panel</h1>
+    <div>
+        <input type="text" id="score" placeholder="Enter score e.g. India 120/3 (15 overs)">
+        <button onclick="sendScore()">Update Score</button>
+    </div>
+
+    <script>
+        let stompClient = null;
+
+        function connect() {
+            const socket = new SockJS('http://localhost:8081/ws');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+            }, function (error) {
+                console.error('WebSocket connection error: ' + error);
+            });
+        }
+
+        function sendScore() {
+            const score = document.getElementById('score').value;
+            if (stompClient && stompClient.connected) {
+                stompClient.send('/app/sendScore', {}, score);
+                console.log('Score sent:', score);
+            } else {
+                console.error('WebSocket connection is not established.');
+            }
+        }
+
+        connect();
+    </script>
+</body>
+</html>
